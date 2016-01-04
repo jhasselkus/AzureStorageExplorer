@@ -25,6 +25,7 @@ using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage.Table.Queryable;
 using Microsoft.Data.OData;
 using System.ComponentModel;
 using Microsoft.Win32;
@@ -3573,6 +3574,48 @@ namespace AzureStorageExplorer
             }
         }
 
+        private static string GetTableQueryOperation(string dialogQueryCondition)
+        {
+            switch (dialogQueryCondition)
+            {
+                case "=":
+                    return QueryComparisons.Equal;
+                case "!=":
+                    return QueryComparisons.NotEqual;
+                case "<":
+                    return QueryComparisons.LessThan;
+                case "<=":
+                    return QueryComparisons.LessThanOrEqual;
+                case ">":
+                    return QueryComparisons.GreaterThan;
+                case ">=":
+                    return QueryComparisons.GreaterThanOrEqual;
+                case null:
+                case "":
+                    return null;
+                default:
+                    throw new ArgumentException("Unrecognized condition: " + dialogQueryCondition, "dialogQueryCondition");
+            }
+        }
+
+        private static string GetQueryFilterCondition(string propertyName, string operation, string value)
+        {
+            string filterCondition = null;
+
+            // Handle the special cases first.
+            switch (propertyName)
+            {
+                case "Timestamp":
+                    filterCondition = TableQuery.GenerateFilterConditionForDate(propertyName, operation, DateTimeOffset.Parse(value));
+                    break;
+
+                default:
+                    filterCondition = TableQuery.GenerateFilterCondition(propertyName, operation, value);
+                    break;
+            }
+
+            return filterCondition;
+        }
 
         //************************
         //*                      *
@@ -3594,13 +3637,13 @@ namespace AzureStorageExplorer
                 // Create a temporary copy of the TableColumnNames table and add columns as we encounter them.
                 // This is done to prume away previously saved colum names that are no longer present in the data.
 
-                Dictionary<String, bool> tempTableColumnNames = new Dictionary<string, bool>();
+                var tempTableColumnNames = new Dictionary<string, bool>();
 
                 TableListViewGridView.Columns.Clear();
 
                 AddTableListViewColumn("PartitionKey");
-                AddTableListViewColumn("RowKey");
-                AddTableListViewColumn("Timestamp", false);
+                AddTableListViewColumn("RowKey", false);
+                AddTableListViewColumn("Timestamp");
 
                 tempTableColumnNames.Add("PartitionKey", TableColumnNames["PartitionKey"]);
                 tempTableColumnNames.Add("RowKey", TableColumnNames["RowKey"]);
@@ -3615,10 +3658,13 @@ namespace AzureStorageExplorer
                 CloudTable table = tableClient.GetTableReference(tableName);
 
                 // Query the table and retrieve a collection of entities.
-
                 var query = new TableQuery<ElasticTableEntity>();
 
-                IEnumerable<ElasticTableEntity> entities = null;
+                // Limit the number of entities returned from the query, defaulting to 500 if not specified.
+                var take = MaxEntityCountFilter > 0 ? MaxEntityCountFilter : 500;
+                query.TakeCount = take;
+
+                IEnumerable<ElasticTableEntity> entities;
 
                 if (EntityQueryEnabled)
                 {
@@ -3626,70 +3672,38 @@ namespace AzureStorageExplorer
 
                     IEnumerable<ElasticTableEntity> q = null;
 
-                    switch (EntityQueryCondition[0])
+                    string filterCondition = null;
+                    var operation = GetTableQueryOperation(EntityQueryCondition[0]);
+                    if (!string.IsNullOrEmpty(operation))
                     {
-                        case "equals":
-                            q = table.ExecuteQuery(query).Where(e => e.Value(EntityQueryColumnName[0]) == EntityQueryValue[0]).Select(e => e);
-                            break;
-                        case "does not equal":
-                            q = table.ExecuteQuery(query).Where(e => e.Value(EntityQueryColumnName[0]) != EntityQueryValue[0]).Select(e => e);
-                            break;
-                        case "contains":
-                            q = table.ExecuteQuery(query).Where(e => e.Value(EntityQueryColumnName[0]).Contains(EntityQueryValue[0])).Select(e => e);
-                            break;
-                        case "starts with":
-                            q = table.ExecuteQuery(query).Where(e => e.Value(EntityQueryColumnName[0]).StartsWith(EntityQueryValue[0])).Select(e => e);
-                            break;
-                        case "ends with":
-                            q = table.ExecuteQuery(query).Where(e => e.Value(EntityQueryColumnName[0]).EndsWith(EntityQueryValue[0])).Select(e => e);
-                            break;
+                        filterCondition = GetQueryFilterCondition(EntityQueryColumnName[0], operation, EntityQueryValue[0]);
                     }
 
                     if (EntityQueryColumnName.Length > 1)
                     {
-                        switch (EntityQueryCondition[1])
+                        operation = GetTableQueryOperation(EntityQueryCondition[1]);
+                        if (!string.IsNullOrEmpty(operation))
                         {
-                            case "equals":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[1]) == EntityQueryValue[1]);
-                                break;
-                            case "does not equal":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[1]) != EntityQueryValue[1]);
-                                break;
-                            case "contains":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[1]).Contains(EntityQueryValue[1]));
-                                break;
-                            case "starts with":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[1]).StartsWith(EntityQueryValue[1]));
-                                break;
-                            case "ends with":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[1]).EndsWith(EntityQueryValue[1]));
-                                break;
+                            filterCondition = TableQuery.CombineFilters(
+                                filterCondition,
+                                TableOperators.And,
+                                GetQueryFilterCondition(EntityQueryColumnName[1], operation, EntityQueryValue[1]));
                         }
                     }
 
                     if (EntityQueryColumnName.Length > 2)
                     {
-                        switch (EntityQueryCondition[2])
+                        operation = GetTableQueryOperation(EntityQueryCondition[2]);
+                        if (!string.IsNullOrEmpty(operation))
                         {
-                            case "equals":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[2]) == EntityQueryValue[2]);
-                                break;
-                            case "does not equal":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[2]) != EntityQueryValue[2]);
-                                break;
-                            case "contains":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[2]).Contains(EntityQueryValue[2]));
-                                break;
-                            case "starts with":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[2]).StartsWith(EntityQueryValue[2]));
-                                break;
-                            case "ends with":
-                                q = q.Where(e => e.Value(EntityQueryColumnName[2]).EndsWith(EntityQueryValue[2]));
-                                break;
+                            filterCondition = TableQuery.CombineFilters(
+                                filterCondition,
+                                TableOperators.And,
+                                GetQueryFilterCondition(EntityQueryColumnName[2], operation, EntityQueryValue[2]));
                         }
                     }
 
-                    entities = q.ToList();
+                    entities = table.ExecuteQuery(query.Where(filterCondition)).ToList();
                 }
                 else
                 {
