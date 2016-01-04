@@ -3650,7 +3650,6 @@ namespace AzureStorageExplorer
                 tempTableColumnNames.Add("Timestamp", TableColumnNames["Timestamp"]);
 
                 int containerCount = 0;
-                long containerSize = 0;
                 _EntityCollection.Clear();
                 TableListView.Visibility = Visibility.Visible;
                 EntityToolbarPanel.Visibility = Visibility.Visible;
@@ -3669,8 +3668,6 @@ namespace AzureStorageExplorer
                 if (EntityQueryEnabled)
                 {
                     EntityQuery.IsChecked = true;
-
-                    IEnumerable<ElasticTableEntity> q = null;
 
                     string filterCondition = null;
                     var operation = GetTableQueryOperation(EntityQueryCondition[0]);
