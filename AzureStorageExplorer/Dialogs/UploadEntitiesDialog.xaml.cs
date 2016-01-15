@@ -20,13 +20,13 @@ namespace AzureStorageExplorer
     /// </summary>
     public partial class UploadEntitiesDialog : Window
     {
-        private bool Initialized = false;
+        private bool _initialized = false;
 
         public UploadEntitiesDialog()
         {
             InitializeComponent();
             CenterWindowOnScreen();
-            Initialized = true;
+            _initialized = true;
         }
 
         //**************************
@@ -131,7 +131,7 @@ namespace AzureStorageExplorer
 
         private void UploadFormat_Checked(object sender, RoutedEventArgs e)
         {
-            if (!Initialized) return;
+            if (!_initialized) return;
 
             EntityXPathPanel.Visibility = System.Windows.Visibility.Collapsed;
             OuterElementPanel.Visibility = System.Windows.Visibility.Collapsed;

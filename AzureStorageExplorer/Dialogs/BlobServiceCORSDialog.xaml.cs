@@ -121,7 +121,7 @@ namespace AzureStorageExplorer
                         {
                             Uri uri = new Uri(origin);
                         }
-                        catch(Exception ex)
+                        catch(Exception)
                         {
                             MessageBox.Show("Error: Rule " + count.ToString() + " contains an invalid Allowed Origin '" + origin + "'. An Allowed Origin must be a value URI.", "CORS Rule Error");
                             return;

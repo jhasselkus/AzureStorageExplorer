@@ -1569,14 +1569,14 @@ namespace AzureStorageExplorer
                             {
                                 CloudBlockBlob sourceBlockBlob = sourceContainer.GetBlockBlobReference(blobName);
                                 CloudBlockBlob targetBlockBlob = destContainer.GetBlockBlobReference(destName);
-                                targetBlockBlob.StartCopyFromBlob(sourceBlockBlob);
+                                targetBlockBlob.StartCopy(sourceBlockBlob);
                                 Success = true;
                             }
                             else if (sourceBlob.BlobType == BlobType.PageBlob)
                             {
                                 CloudPageBlob sourcePageBlob = sourceContainer.GetPageBlobReference(blobName);
                                 CloudPageBlob targetPageBlob = destContainer.GetPageBlobReference(destName);
-                                targetPageBlob.StartCopyFromBlob(sourcePageBlob);
+                                targetPageBlob.StartCopy(sourcePageBlob);
                                 Success = true;
                             }
 
@@ -3951,7 +3951,7 @@ namespace AzureStorageExplorer
 
                 } // end if
             } // end try
-            catch(Exception ex)
+            catch(Exception)
             {
                 //Console.WriteLine(ex.Message);
             }
@@ -4226,7 +4226,6 @@ namespace AzureStorageExplorer
                 MessageListView.ItemsSource = null; //  MessageCollection;
 
                 int containerCount = 0;
-                long containerSize = 0;
                 _MessageCollection.Clear();
                 MessageListView.Visibility = Visibility.Visible;
                 QueueToolbarPanel.Visibility = Visibility.Visible;
@@ -4421,7 +4420,7 @@ namespace AzureStorageExplorer
 
                 } // end if
             } // end try
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Console.WriteLine(ex.Message);
             }
@@ -5095,7 +5094,7 @@ namespace AzureStorageExplorer
                 table.Execute(TableOperation.Insert(entity));
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

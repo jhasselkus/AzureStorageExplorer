@@ -525,7 +525,7 @@ namespace AzureStorageExplorer
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Error parsing data. Please enter one or more hex pairs, separated by spaces.\n\nExample: 01 02 03 0C 0D 0E 0F\n\nIf you enter less than 512 bytes, the data will be repeated to fill a 512-byte page.", "Invalid data");
             }

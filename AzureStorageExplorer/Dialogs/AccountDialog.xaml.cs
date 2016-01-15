@@ -24,8 +24,6 @@ namespace AzureStorageExplorer
     /// </summary>
     public partial class AccountDialog : Window
     {
-        private bool DialogInitialized = false;
-        
         public bool UseSSL = false;
         public bool IsEdit = false;
 
@@ -36,7 +34,6 @@ namespace AzureStorageExplorer
         {
             InitializeComponent();
             this.Owner = Application.Current.MainWindow;
-            DialogInitialized = true;
         }
 
         public void SetEndpoint(String endpoint)
@@ -86,10 +83,10 @@ namespace AzureStorageExplorer
                 ButtonPanel.Visibility = System.Windows.Visibility.Hidden;
                 Message.Text = "Testing account access...";
 
-                bool useSSL = false;
+                UseSSL = false;
                 if (UseHTTPS.IsChecked.HasValue && UseHTTPS.IsChecked.Value)
                 {
-                    useSSL = true;
+                    UseSSL = true;
                 }
 
                 TestAccountAccess(accountName, accountKey, isDevStorage);
@@ -196,7 +193,7 @@ namespace AzureStorageExplorer
 
             CloudBlobClient blobClient = account.CreateCloudBlobClient();
             IEnumerable<CloudBlobContainer> containers = blobClient.ListContainers();
-            foreach (Microsoft.WindowsAzure.Storage.Blob.CloudBlobContainer container in containers)
+            foreach (CloudBlobContainer container in containers)
             {
             }
         }

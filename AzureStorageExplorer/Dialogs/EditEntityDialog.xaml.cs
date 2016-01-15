@@ -25,9 +25,7 @@ namespace AzureStorageExplorer
 
         public const String NULL_VALUE = "NULL ";
         
-        private bool Initialized = false;
-
-        private bool IsAddNew = false;
+        private bool _isAddNew = false;
         private ElasticTableEntity Entity = null;
         private CloudTable Table = null;
 
@@ -49,7 +47,6 @@ namespace AzureStorageExplorer
         public EditEntityDialog()
         {
             InitializeComponent();
-            Initialized = true;
             CenterWindowOnScreen();
         }
 
@@ -81,7 +78,7 @@ namespace AzureStorageExplorer
         
         public void InitForInsert(CloudTable table, Dictionary<String, bool> tableColumnNames)
         {
-            this.IsAddNew = true;
+            this._isAddNew = true;
             this.Table = table;
             this.Title = "Insert New Entity";
             this.CmdInsertUpdateEntity.Content = new TextBlock() { Text = "Insert Entity" };
@@ -118,7 +115,7 @@ namespace AzureStorageExplorer
             String fieldType = null;
 
             this.Entity = entity;
-            this.IsAddNew = false;
+            this._isAddNew = false;
             this.Table = table;
             this.Title = "Update Entity";
             this.CmdInsertUpdateEntity.Content = new TextBlock() { Text = "Update Entity" };
@@ -183,7 +180,7 @@ namespace AzureStorageExplorer
             String fieldType = null;
             
             this.Entity = entity;
-            this.IsAddNew = true;
+            this._isAddNew = true;
             this.Table = table;
             this.Title = "Copy Entity";
             this.CmdInsertUpdateEntity.Content = new TextBlock() { Text = "Insert Entity" };
@@ -414,7 +411,7 @@ namespace AzureStorageExplorer
         private void InsertUpdateEntity_Click(object sender, RoutedEventArgs e)
         {
             String action = "update entity";
-            if (IsAddNew)
+            if (_isAddNew)
             {
                 action = "insert entity";
             }
@@ -483,7 +480,7 @@ namespace AzureStorageExplorer
                                 }
                                 entity[fieldName] = bytes;
                             }
-                            catch(Exception ex)
+                            catch(Exception)
                             {
                                 MessageBox.Show("Cannot " + action + ": " + fieldName + " does not contain a valid hexadecimal bytes representation: " + fieldValue, "Invalid Value");
                                 this.Cursor = Cursors.Arrow;
@@ -595,7 +592,7 @@ namespace AzureStorageExplorer
 
             try
             {
-                if (IsAddNew)
+                if (_isAddNew)
                 {
                     // Insert entity and keep dialog open.
 
@@ -637,7 +634,7 @@ namespace AzureStorageExplorer
             {
                 this.Cursor = Cursors.Arrow;
 
-                if (IsAddNew)
+                if (_isAddNew)
                 {
                     Message.Text = "Error inserting record: " + ex.Message;
                 }

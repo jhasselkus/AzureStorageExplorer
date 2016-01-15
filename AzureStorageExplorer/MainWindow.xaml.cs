@@ -25,7 +25,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
 using AzureStorageExplorer.Helpers;
-using System.Windows;
 namespace AzureStorageExplorer
 {
     /// <summary>
@@ -648,7 +647,7 @@ namespace AzureStorageExplorer
                     MainWindow.ContentTypes.Add(".zip", "application/zip");
                 }
             } // end try
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Console.WriteLine(ex.Message);
             }

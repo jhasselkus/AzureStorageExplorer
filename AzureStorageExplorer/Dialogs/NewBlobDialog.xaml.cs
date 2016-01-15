@@ -19,13 +19,13 @@ namespace AzureStorageExplorer
     /// </summary>
     public partial class NewBlobDialog : Window
     {
-        private bool Initialized = false;
+        private bool _initialized = false;
         public int PageBlobSize = 0;
 
         public NewBlobDialog()
         {
             InitializeComponent();
-            Initialized = true;
+            _initialized = true;
             CenterWindowOnScreen();
             //BlobName.Focus();
             BlobTypeBlock.Focus();
@@ -50,7 +50,7 @@ namespace AzureStorageExplorer
 
         private void BlobType_Checked(object sender, RoutedEventArgs e)
         {
-            if (!Initialized) return;
+            if (!_initialized) return;
 
             if (BlobTypePage.IsChecked.Value)
             {
