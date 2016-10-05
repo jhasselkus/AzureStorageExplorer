@@ -148,6 +148,7 @@
       <DependentUpon>NewContainerDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Crypto.cs" />
+    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Models\Action.cs" />
     <Compile Include="Models\MessageItem.cs" />
     <Compile Include="Models\CheckedListItem.cs" />

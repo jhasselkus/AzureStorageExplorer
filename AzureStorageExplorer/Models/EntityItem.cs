@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
+using AzureStorageExplorer.Helpers;
 
 namespace AzureStorageExplorer
 {
@@ -43,7 +44,14 @@ namespace AzureStorageExplorer
                 }
                 else
                 {
-                    this.Fields.Add(prop.Key, prop.Value.PropertyAsObject.ToString());
+                    if (prop.Key == "Message")
+                    {
+                        this.Fields.Add(prop.Key, prop.Value.StringValue.Truncate(255, ellipses: true));
+                    }
+                    else
+                    {
+                        this.Fields.Add(prop.Key, prop.Value.PropertyAsObject.ToString());
+                    }
                 }
             }
 
